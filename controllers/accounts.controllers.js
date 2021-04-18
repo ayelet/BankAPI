@@ -16,6 +16,18 @@ const getAccounts = () => {
   return accounts;
 };
 
+const updateFile = () => {
+  fs.writeFileSync(
+    "./Databases/accounts.json",
+    JSON.stringify({ users: accounts }),
+    function (err) {
+      if (err) return false;
+      console.log("added new account and written to file");
+      return true;
+    }
+  );
+};
+
 const getAccount = (id) => {
   console.log("Account: ", id);
   const found = find(id);
@@ -29,14 +41,11 @@ const getActiveAccounts = (activeState) => {
 const updateCredit = (id, newCredit) => {
   const found = find(id);
   if (!found) return false;
-  if (newcredit < 0) return false;
+  if (newCredit < 0) return false;
   found.credit = newCredit;
+  updateFile();
   return found;
 };
-
-const withdraw = (id, amount) => {};
-
-const transferMoney = (srcId, destId, amount) => {};
 
 const validateID = (id) => {
   if (id < 0) return false;
@@ -62,31 +71,55 @@ const addAccount = (newAccount) => {
   console.log(acc);
   accounts.push(acc);
   console.log(accounts);
-  fs.writeFileSync(
-    "./Databases/accounts.json",
-    JSON.stringify(accounts),
-    function (err) {
-      if (err) return false;
-      console.log("added new account and written to file");
-      return true;
-    }
-  );
-  fs.readdir("./", (err, files) => {
-    if (err) console.log(err);
-    else {
-      console.log("\nCurrent directory filenames:");
-      files.forEach((file) => {
-        console.log(file);
-      });
-    }
-  });
+  updateFile();
+
   return true;
 };
-/*
-fs.writeFile("hello_renamed.txt", "Hello content!", function (err) {
-  if (err) throw err;
-  console.log("Saved!");
-});*/
+
+const deposit = (id, amount) => {
+  if (isNaN(amount) || amount < 0)
+    return { status: 422, error: "Invalid amount" };
+
+  const found = find(id);
+  if (!found) return { status: 204, error: "Invalid ID" };
+  found.cash = parseInt(found.cash) + amount;
+  updateFile();
+  return { status: 200, success: found };
+};
+
+const withdraw = (id, amount) => {
+  if (isNaN(amount) || amount < 0)
+    return { status: 422, error: "Invalid amount" };
+
+  const found = find(id);
+  if (!found) return { status: 204, error: "Invalid ID" };
+
+  // check if withdrawal does not exceed credit
+  if (parseInt(found.cash) + parseInt(found.credit) > amount) {
+    return { status: 403, error: "Forbidden: amounts excedes credit" };
+  }
+
+  found.cash = parseInt(found.cash) - amount;
+  // do not forget to write to the file
+  updateFile();
+  return { status: 200, success: found };
+};
+
+const transferMoney = (srcId, destId, amount) => {
+  if (isNaN(amount) || amount < 0)
+    return { status: 422, error: "Invalid amount" };
+
+  const srcFound = find(srcId);
+  const destFound = find(destId);
+  if (!srcFound || !destFound) return { status: 204, error: "Invalid ID" };
+  const result1 = widthdraw(srcId, amount);
+  if (result1.status != 200) return result1;
+  const result2 = deposit(destId, amount);
+  if (result2.status != 200) return result2;
+  // success! update file and return
+  updateFile();
+  return { status: 200, success: [found1, found2] };
+};
 
 module.exports = {
   getAccounts,
@@ -94,6 +127,7 @@ module.exports = {
   updateCredit,
   validateID,
   addAccount,
-  //   getWorkers,
-  //   getWorkerById,
+  deposit,
+  withdraw,
+  transferMoney,
 };
