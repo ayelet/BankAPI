@@ -11,6 +11,13 @@ router
     // return res.send(accountsController.getAccounts());
     return res.status(200).json({ users: accountsController.getAccounts() });
   })
+  // get rid of the annoying favicon request
+  .get("/favicon.ico", (req, res) => {
+    res.writeHead(200, { "Content-Type": "image/x-icon" });
+    res.end();
+    console.log("favicon requested");
+    return;
+  })
   // get accound by passposrt_id
   .get("/:accountId", (req, res) => {
     const id = req.params.accountId;
