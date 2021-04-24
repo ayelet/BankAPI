@@ -21,17 +21,16 @@ app.use("/bank/users", usersRoute);
 
 //connect to db with mongoose
 const server =
-  "mongodb+srv://Ayelet:<password>@cluster0.a5o1n.mongodb.net/myFirstDatabase?retryWrites=true&w=majority/bank_db";
+  "mongodb+srv://Ayelet:" +
+  "yiYM4cuIvlyGfJPL" +
+  "@cluster0.a5o1n.mongodb.net/bank_db?retryWrites=true&w=majority/bank_db";
 mongoose
-  .connect(
-    "mongodb+srv://Ayelet:yiYM4cuIvlyGfJPL@cluster0.a5o1n.mongodb.net/myFirstDatabase?retryWrites=true&w=majority/bank_db",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
-      useCreateIndex: true,
-    }
-  )
+  .connect(server, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    useCreateIndex: true,
+  })
   .then(() => {
     console.log("database connected: mongodb:@cluster0.a5o1n.mongodb.net");
   });

@@ -1,7 +1,7 @@
 // const roomModel = require("../db/model");
 const userModel = require("../models/users.model");
 // Helper functions
-const validateId = (id) => {
+const validate = (id) => {
   if (!id || id < 0) return false;
   return true;
 };
@@ -20,13 +20,17 @@ const getUsers = async (res) => {
 // 2. Get a specific user
 const getUser = async (req, res) => {
   try {
-    const id = req.params.id;
-    if (!validateID(id)) return res.status(400).send("Bad request, invalid ID");
-    const user = await roomModel.find({ id });
+    const user_id = parseInt(req.params.id);
+    if (!validate(user_id))
+      return res.status(400).send("Bad request, invalid ID");
+    console.log("1. getting user by id ", user_id);
+    const user = await userModel.find({ user_id: user_id });
     if (!user) return res.status(404).send("user does not exist");
-    console.log("getting user  ", id);
-    if (!room) return res.status(404).send("No room found");
+    console.log("2. getting user  ", user_id, user);
+    return res.status(200).send({ user: user });
+    // if (!user) return res.status(404).send("No user found");
   } catch (err) {
+    console.log(err);
     return res.status(500).send(err);
   }
 };
