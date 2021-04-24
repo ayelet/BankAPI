@@ -1,6 +1,9 @@
-const data = require("../Databases/accounts.json");
+// const data = require("../Databases/accounts.json");
+// const users = require("../models/users.model");
+const accounts = require("../models/accounts.model");
 const fs = require("fs");
-const accounts = data.users;
+const accountModel = require("../models/accounts.model");
+// const accounts = data.users;
 
 // helper functions
 const find = (id) => {
@@ -10,42 +13,122 @@ const find = (id) => {
   return acc;
 };
 ///////////////////////////////////////////
-// console.log(users);
-const getAccounts = () => {
-  console.log(accounts);
-  return accounts;
+
+// 1. Get all accounts
+const getAccounts = async (req, res) => {
+  try {
+    console.log("Get all accounts from DB");
+    const accounts = await accountModel.find({});
+    if (!accounts) return res.status(404).send("No account found");
+    return res.status(200).send({ accounts: accounts });
+  } catch (err) {
+    return res.status(500).send(err);
+  }
 };
 
-const updateFile = () => {
-  fs.writeFileSync(
-    "./Databases/accounts.json",
-    JSON.stringify({ users: accounts }),
-    function (err) {
-      if (err) return false;
-      console.log("added new account and written to file");
-      return true;
-    }
-  );
+// const getAccount = (id) => {
+//   console.log("Account: ", id);
+//   const found = find(id);
+//   return found;
+// };
+
+// 2. Get a specific account by id
+const getAccount = async (req, res) => {
+  const id = req.params.id;
+  console.log("getting account  ", id);
+  try {
+    // TODO - Add validation here
+    await accountModel.find({ id }).then((account) => account);
+    if (!account) return res.status(404).send("No account found");
+  } catch (err) {
+    return res.status(500).send(err);
+  }
 };
 
-const getAccount = (id) => {
-  console.log("Account: ", id);
-  const found = find(id);
-  return found;
-};
-const getActiveAccounts = (activeState) => {
-  retun(accounts.filter((account) => account.isActive === activeState));
+//Create a new Account
+const createAccount = async (req, res) => {
+  console.log(req.body);
+  // const { roomReq } = req.body;
+  const date = Date.now();
+  if (req.body.details.dateAdded) date = req.body.details.dateAdded;
+  console.log("date Added: ", date);
+  const account = new accountModel({
+    // name: req.body.name,
+    // category: req.body.category,
+    user_id: req.body.user_id,
+    amount: req.body.amount,
+    credit: req.body.credit,
+    isActive: req.body.isActive,
+  });
+  try {
+    await account.save();
+    return res.status(201).json({ success: account });
+  } catch (err) {
+    return res.status(400).json({ Error: err });
+  }
 };
 
-// update creadit details
-const updateCredit = (id, newCredit) => {
-  const found = find(id);
-  if (!found) return false;
-  if (newCredit < 0) return false;
-  found.credit = newCredit;
-  updateFile();
-  return found;
+// Update an existing account
+//TODO
+const updateAccount = async (req, res) => {
+  console.log("Updating account");
 };
+
+// Delete an account by its ID
+const deleteAccount = async (req, res) => {
+  const id = req.params.id;
+  console.log("getting account  ", id);
+  try {
+    // TODO - Add validation here
+    if (!validateID(id))
+      res.status(400).send("Bad request, account id invalid");
+    const account = await accountModel.findByIdAndDelete({ id });
+    if (!account) return res.status(404).send("No account found");
+    res.status(200).send({ success: account });
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+};
+
+// Delete all accounts
+const deleteAllAccounts = async (req, res) => {
+  console.log("deleting all accounts");
+  try {
+    const result = await accountModel.deleteMany({});
+    console.log("Deleted ", result.deletedCount);
+    if (!result) return res.status(404).send("No accounts found");
+    res
+      .status(200)
+      .send("Successfully deleted " + result.deletedCount + " account");
+  } catch (err) {
+    return res.status(500).send(err);
+  }
+};
+// const updateFile = () => {
+//   fs.writeFileSync(
+//     "./Databases/accounts.json",
+//     JSON.stringify({ users: accounts }),
+//     function (err) {
+//       if (err) return false;
+//       console.log("added new account and written to file");
+//       return true;
+//     }
+//   );
+// };
+
+// const getActiveAccounts = (activeState) => {
+//   retun(accounts.filter((account) => account.isActive === activeState));
+// };
+
+// // update creadit details
+// const updateCredit = (id, newCredit) => {
+//   const found = find(id);
+//   if (!found) return false;
+//   if (newCredit < 0) return false;
+//   found.credit = newCredit;
+//   updateFile();
+//   return found;
+// };
 
 const validateID = (id) => {
   if (id < 0) return false;
@@ -53,28 +136,28 @@ const validateID = (id) => {
   return true;
 };
 
-const addAccount = (newAccount) => {
-  console.log(newAccount.passport_id);
-  if (!newAccount) return false;
-  //if account already exists, return false
-  const found = find(newAccount.passport_id);
-  console.log("acount found? ", found);
-  if (found) return false;
-  const acc = {
-    passport_id: newAccount.passport_id,
-    first_name: newAccount.first_name,
-    last_name: newAccount.last_name,
-    cash: newAccount.cash,
-    credit: newAccount.credit,
-    isActive: true,
-  };
-  console.log(acc);
-  accounts.push(acc);
-  console.log(accounts);
-  updateFile();
+// const createAccount = (newAccount) => {
+//   console.log(newAccount.passport_id);
+//   if (!newAccount) return false;
+//   //if account already exists, return false
+//   const found = find(newAccount.passport_id);
+//   console.log("acount found? ", found);
+//   if (found) return false;
+//   const acc = {
+//     passport_id: newAccount.passport_id,
+//     first_name: newAccount.first_name,
+//     last_name: newAccount.last_name,
+//     cash: newAccount.cash,
+//     credit: newAccount.credit,
+//     isActive: true,
+//   };
+//   console.log(acc);
+//   accounts.push(acc);
+//   console.log(accounts);
+//   updateFile();
 
-  return true;
-};
+//   return true;
+// };
 
 const deposit = (id, amount) => {
   if (isNaN(amount) || amount < 0)
@@ -121,13 +204,22 @@ const transferMoney = (srcId, destId, amount) => {
   return { status: 200, success: [found1, found2] };
 };
 
+// module.exports = {
+//   getAccounts,
+//   getAccount,
+//   updateCredit,
+//   validateID,
+//   addAccount,
+//   deposit,
+//   withdraw,
+//   transferMoney,
+// };
+
 module.exports = {
   getAccounts,
   getAccount,
-  updateCredit,
-  validateID,
-  addAccount,
-  deposit,
-  withdraw,
-  transferMoney,
+  createAccount,
+  updateAccount,
+  deleteAccount,
+  deleteAllAccounts,
 };

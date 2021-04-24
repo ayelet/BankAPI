@@ -8,8 +8,9 @@ router
   // get a list of all users
   .get("/", (req, res) => {
     console.log("get request to fetch all accounts");
+    accountsController.getAccounts(req, res);
     // return res.send(accountsController.getAccounts());
-    return res.status(200).json({ users: accountsController.getAccounts() });
+    // return res.status(200).json({ accounts: accountsController.getAccounts() });
   })
   // get rid of the annoying favicon request
   .get("/favicon.ico", (req, res) => {
@@ -23,7 +24,7 @@ router
     const id = req.params.accountId;
     if (!accountsController.validateID(id))
       return res.status(422).json("invalid data");
-    console.log("returning account id", req.params.accountId);
+    console.log("returning account id", id);
     // find account
     const found = accountsController.getAccount(id);
     console.log("found account: ", found);
