@@ -8,9 +8,15 @@ const accountModel = require("../models/accounts.model");
 // helper functions
 const find = (id) => {
   console.log("searching for " + id);
-  const acc = accounts.find((account) => account.passport_id === parseInt(id));
+  const acc = accounts.find((account) => account.account_id === parseInt(id));
   console.log("found: " + acc);
   return acc;
+};
+
+// Helper functions
+const validateID = (id) => {
+  if (!id || id < 0) return false;
+  return true;
 };
 ///////////////////////////////////////////
 
@@ -37,9 +43,9 @@ const getAccount = async (req, res) => {
   const id = req.params.id;
   console.log("getting account  ", id);
   try {
-    // TODO - Add validation here
-    const account = await accountModel.find({ id });
-    if (!account) return res.status(404).send("No account found");
+    if (!validateID(id)) return res.status(400).send({ error: "Invalid id" });
+    const account = await accountModel.find({ account_id: id });
+    if (account.length < 1) return res.status(404).send("No account found");
     return res.status(200).send({ account: account });
   } catch (err) {
     return res.status(500).send(err);
@@ -50,12 +56,12 @@ const getAccount = async (req, res) => {
 const createAccount = async (req, res) => {
   console.log(req.body);
   // const { roomReq } = req.body;
-  const date = Date.now();
-  if (req.body.details.dateAdded) date = req.body.details.dateAdded;
+
+  const date = Date.now;
+  if (req.body.dateAdded) date = req.body.dateAdded;
   console.log("date Added: ", date);
   const account = new accountModel({
-    // name: req.body.name,
-    // category: req.body.category,
+    account_id: req.body.account_id,
     user_id: req.body.user_id,
     amount: req.body.amount,
     credit: req.body.credit,
@@ -70,9 +76,35 @@ const createAccount = async (req, res) => {
 };
 
 // Update an existing account
-//TODO
 const updateAccount = async (req, res) => {
   console.log("Updating account");
+  const updates = Object.keys(req.body);
+  const allowedUpdate = ["isActive", "amount", "credit"];
+  const isValidOperation = updates.every((update) =>
+    allowedUpdate.includes(update)
+  );
+  const { id } = req.params;
+  if (!validateID(id))
+    return res.status(400).send("Bad request, invalid account id");
+  if (!isValidOperation)
+    return res.status(400).send({ error: "Invalid updates!" });
+  try {
+    let account = await accountModel.findOne({ account_id: id });
+    // let account = new accountModel();
+    console.log("Account found:", account);
+    updates.forEach((update) => {
+      account[update] = req.body[update];
+    });
+    console.log("Account updated: ", account);
+    await account.save();
+    if (!account)
+      return res.status(404).send({ error: "could update account" });
+
+    return res.send(account);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({ error: err });
+  }
 };
 
 // Delete an account by its ID
@@ -131,11 +163,11 @@ const deleteAllAccounts = async (req, res) => {
 //   return found;
 // };
 
-const validateID = (id) => {
-  if (id < 0) return false;
-  if (isNaN(id)) return false;
-  return true;
-};
+// const validateID = (id) => {
+//   if (id < 0) return false;
+//   if (isNaN(id)) return false;
+//   return true;
+// };
 
 // const createAccount = (newAccount) => {
 //   console.log(newAccount.passport_id);

@@ -1,5 +1,6 @@
 // Accounts Schema
 const mongoose = require("mongoose");
+const userModel = require('./users.model')
 
 const accountSchema = mongoose.Schema({
   account_id: {
@@ -7,19 +8,20 @@ const accountSchema = mongoose.Schema({
     required: true,
     unique: true,
   },
-  uesr_id: {
+  user_id: {
     type: Number,
     required: true,
     unique: false,
+    validate(value) {
+      
+    }
   },
   amount: {
     type: Number,
-    required: true,
     default: 0,
   },
   credit: {
     type: Number,
-    required: true,
     default: 0,
   },
   isActive: {

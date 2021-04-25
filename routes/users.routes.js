@@ -15,11 +15,15 @@ router
     console.log("Get user by id", req.params.id);
     usersController.getUser(req, res);
   })
-  .post("/add", (req, res) => {
+  .post("/", (req, res) => {
     console.log("Add user", req.body);
     usersController.addUser(req, res);
   })
-  .put("/update/:id", (req, res) => {
+  .post('/login', (req, res) => {
+    console.log("User Login");
+    usersController.loginUser(req, res);
+  })
+  .put("/:id", (req, res) => {
     console.log("Update existing user", req.params.id);
     usersController.updateUser(req, res);
   })

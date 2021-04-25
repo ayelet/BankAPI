@@ -19,30 +19,24 @@ router
     console.log("favicon requested");
     return;
   })
-  // get accound by passposrt_id
-  .get("/:accountId", (req, res) => {
-    const id = req.params.accountId;
-    if (!accountsController.validateID(id))
-      return res.status(422).json("invalid data");
-    console.log("returning account id", id);
-    // find account
-    const found = accountsController.getAccount(id);
-    console.log("found account: ", found);
-    if (found) return res.status(200).send(found);
-
-    console.log("response not found");
-    return res.status(404).send("account not found").end();
-    // return res.sendStatus(404).json({ error: "account not found" });
+  // get account by account_id
+  .get("/:id", (req, res) => {
+    accountsController.getAccount(req, res);
   })
   .post("/", (req, res) => {
     console.log("post request to add user");
-    const added = accountsController.addAccount(req.body);
-    if (added) {
-      return res.status(201).send("Added account");
-    }
-    return res.status(422).send("error in adding account");
-    // console.log(req.body);
-    // workerController.addWorker(req, res);
+    accountsController.createAccount(req, res);
+    // const added = accountsController.createAccount(req, res);
+    // if (added) {
+    //   return res.status(201).send("Added account");
+    // }
+    // return res.status(422).send("error in adding account");
+    // // console.log(req.body);
+    // // workerController.addWorker(req, res);
+  })
+  .put("/:id", (req, res) => {
+    console.log("Update account request");
+    accountsController.updateAccount(req, res);
   })
   .put("/setCredit/:id/:credit", (req, res) => {
     console.log("setting new credit:", req.params.id, req.params.credit);

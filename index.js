@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 const mongoose = require("mongoose");
+// const jwt = require("jsonwebtoken");
 const app = express();
 const cors = require("cors");
 app.use(cors());
@@ -47,6 +48,19 @@ app.get("/", (req, res) => {
   console.log("welcome GET request");
   res.status(200).send("Welcome to Bank of Cayman Islands");
 });
+
+// const myfunction = async () => {
+//   const token = jwt.sign({ __id: "administrator" }, "mysecretstring", {
+//     expiresIn: "1 day",
+//   });
+//   console.log("Token: ", token);
+
+//   // Verify your token by taking the secret
+//   const data = jwt.verify(token, "mysecretstring");
+//   console.log(data);
+// };
+
+// myfunction();
 
 app.listen(port, () => {
   console.log(`Bank Server listening at ${port}`);

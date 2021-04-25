@@ -39,26 +39,67 @@ const addUser = async (req, res) => {
   console.log(req.body);
   // const { roomReq } = req.body;
   const date = Date.now();
-  if (req.body.details.dateAdded) date = req.body.dateAdded;
+  if (req.body.dateAdded) date = req.body.dateAdded;
   //   console.log("date Added: ", date);
   const user = new userModel({
     user_id: req.body.user_id,
     first_name: req.body.first_name,
     last_name: req.body.last_name,
-    dateAdded: date,
+    password: req.body.password,
+    email: req.body.email,
+    dateAdded: req.body.dateAdded,
   });
   try {
     await user.save();
     return res.status(201).json({ success: user });
   } catch (err) {
+    console.log("error in adding user: ", err);
     return res.status(400).json({ Error: err });
   }
 };
 
 // 4. update an existing user
-const updateUser = async (req, res) => {};
+const updateUser = async (req, res) => {
+  const updates = Object.keys(req.body);
+  const allowedUpdate = ["first_name", "last_name"];
+  const isValidOperation = updates.every((update) =>
+    allowedUpdate.includes(update)
+  );
+  const { id } = req.params;
+  if (!validateId(id)) return res.status(400).send("Bad request, invalide ID");
+  if (!isValidOperation)
+    return res.status(400).send({ error: "Invalid updates!" });
+  try {
+    const user = await userModel.find({ user_id: id });
 
-// 1. Delete a specific user by its id
+    updates.forEach((update) => {
+      userModel[update] = req.body[update];
+    });
+    await user.save();
+    if (!user) return res.status(404).send({ error: "could update user" });
+
+    return res.send(user);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({ error: err });
+  }
+};
+
+// Login User
+const loginUser = async (req, res) => {
+  try {
+    const user = await userModel.findByCredentials(
+      req.body.email,
+      req.body.password
+    );
+    const token = await user.generateAuthToken();
+    res.send({ user, token });
+  } catch (e) {
+    res.status(400).send();
+  }
+};
+
+// Delete a specific user by its id
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -96,4 +137,5 @@ module.exports = {
   updateUser,
   deleteUser,
   deleteAllUsers,
+  loginUser,
 };
