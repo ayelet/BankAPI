@@ -6,7 +6,7 @@ router
 
   // get a list of all users
   .get("/", (req, res) => {
-    console.log("get request to fetch all users");
+    console.log("GET request to fetch all users");
     usersController.getUsers(res);
     // return res.send(usersController.getAccounts());
     // return res.status(200).json({ users: usersController.getUsers() });

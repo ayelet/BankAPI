@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const path = require("path");
 const mongoose = require("mongoose");
 const app = express();
 const cors = require("cors");
@@ -8,6 +9,7 @@ const port = process.env.PORT || 5000;
 // const usersRoute = require("./routes/users.routes");
 const accountsRoute = require("./routes/accounts.routes");
 const usersRoute = require("./routes/users.routes");
+const config = require("./config/database");
 
 // create application/x-www-form-urlencoded parser
 const urlencodedParse = app.use(bodyParser.urlencoded({ extended: false }));
@@ -20,12 +22,9 @@ app.use("/bank/users", usersRoute);
 // app.use("/bank/transactions/", transactionsRoute)
 
 //connect to db with mongoose
-const server =
-  "mongodb+srv://Ayelet:" +
-  "yiYM4cuIvlyGfJPL" +
-  "@cluster0.a5o1n.mongodb.net/bank_db?retryWrites=true&w=majority/bank_db";
+const server = process.env.MONGODB_URI || config.database;
 mongoose
-  .connect(server, {
+  .connect(process.env.MONGODB_URI || config.database, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
@@ -34,6 +33,15 @@ mongoose
   .then(() => {
     console.log("database connected: mongodb:@cluster0.a5o1n.mongodb.net");
   });
+
+mongoose.connection.on("error", (err) => {
+  console.log("database error: ", err);
+});
+
+if (process.env.NODE_ENV === "production") {
+  // set static folder
+  app.use(express.static(path.join(__dirname, "./client/bank-frontend/build")));
+}
 
 app.get("/", (req, res) => {
   console.log("welcome GET request");
