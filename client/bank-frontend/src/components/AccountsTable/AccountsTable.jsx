@@ -6,13 +6,17 @@ const AccountsTable = () => {
   const [accounts, setAccounts] = useState([]);
   useEffect(() => {
     // effect
-    // const baseUrl = "http://localhost:5000/api/accounts/";
-    const baseUrl = "https://bank-backend1.herokuapp.com/api/accounts/";
-    axios.get(baseUrl).then(function (response) {
-      console.log(response);
-      setAccounts(response.data.users);
-      console.log(accounts);
-    });
+    const baseUrl = "http://localhost:5001/bank/users/";
+    // const baseUrl = "https://bank-backend1.herokuapp.com/api/accounts/";
+    try {
+      axios.get(baseUrl).then(function (response) {
+        console.log(response);
+        setAccounts(response.data);
+        console.log(accounts);
+      });
+    } catch (err) {
+      console.log(err);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -31,7 +35,7 @@ const AccountsTable = () => {
         {accounts.map((account) => {
           return (
             <tr key={account.passport_id}>
-              <td>{account.passport_id}</td>
+              <td>{account.user_id}</td>
               <td>{account.first_name}</td>
               <td>{account.last_name}</td>
               <td>{account.cash}</td>

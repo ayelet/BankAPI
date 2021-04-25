@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "cd client/bank-frontend && npm run build",
-    "install-client": "cd client/bank-frontend && npm install",
-    "heroku-postbuild": "npm run install-client && npm run build",
-    "start": "node index.js"
+    "start": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
