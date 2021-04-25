@@ -38,8 +38,9 @@ const getAccount = async (req, res) => {
   console.log("getting account  ", id);
   try {
     // TODO - Add validation here
-    await accountModel.find({ id }).then((account) => account);
+    const account = await accountModel.find({ id });
     if (!account) return res.status(404).send("No account found");
+    return res.status(200).send({ account: account });
   } catch (err) {
     return res.status(500).send(err);
   }
