@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const app = express();
 const cors = require("cors");
 app.use(cors());
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 // const usersRoute = require("./routes/users.routes");
 const accountsRoute = require("./routes/accounts.routes");
 const usersRoute = require("./routes/users.routes");
@@ -38,8 +38,8 @@ mongoose.connection.on("error", (err) => {
   console.log("database error: ", err);
 });
 
+// set static folder
 if (process.env.NODE_ENV === "production") {
-  // set static folder
   app.use(express.static(path.join(__dirname, "./client/bank-frontend/build")));
 }
 

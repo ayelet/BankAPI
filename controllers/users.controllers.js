@@ -7,9 +7,8 @@ const validate = (id) => {
 };
 // 1. Get all users
 const getUsers = async (res) => {
-  const users = await userModel.find({});
-
   try {
+    const users = await userModel.find({});
     if (!users) return res.status(404).send("No users found");
     return res.status(200).send(users);
   } catch (err) {
