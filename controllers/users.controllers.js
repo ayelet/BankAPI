@@ -34,6 +34,10 @@ const getUser = async (req, res) => {
   }
 };
 
+const getUserProfile = async (req, res) => {
+  return res.send(req.user);
+};
+
 // 3. add a new user
 const addUser = async (req, res) => {
   console.log(req.body);
@@ -51,7 +55,8 @@ const addUser = async (req, res) => {
   });
   try {
     await user.save();
-    return res.status(201).json({ success: user });
+    const token = user.generateAuthToken();
+    return res.status(201).json({ user, token });
   } catch (err) {
     console.log("error in adding user: ", err);
     return res.status(400).json({ Error: err });
@@ -99,6 +104,30 @@ const loginUser = async (req, res) => {
   }
 };
 
+// Log out from one session
+const logoutUser = async (req, res) => {
+  try {
+    console.log("log out user ", req.user);
+    req.user.tokens = req.user.tokens.filter((token) => {
+      return token.token !== req.token;
+    });
+    await req.user.save();
+    res.send();
+  } catch (err) {
+    res.status(500).send();
+  }
+};
+// Logout from all session (delete all tokens)
+const logoutAll = async (req, res) => {
+  try {
+    console.log("log out all session", req.user);
+    req.user.tokens = [];
+    await req.user.save();
+    res.send();
+  } catch (e) {
+    res.status(500).send();
+  }
+};
 // Delete a specific user by its id
 const deleteUser = async (req, res) => {
   try {
@@ -137,5 +166,8 @@ module.exports = {
   updateUser,
   deleteUser,
   deleteAllUsers,
+  getUserProfile,
   loginUser,
+  logoutUser,
+  logoutAll,
 };

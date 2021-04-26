@@ -2,7 +2,9 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
+// const auth = require("../middleware/auth.middleware");
 const jwt = require("jsonwebtoken");
+const accountModel = require("./accounts.model");
 
 const userSchema = mongoose.Schema({
   user_id: {
@@ -64,7 +66,19 @@ userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign({ _id: user._id.toString() }, "thisismysecret");
   user.tokens = user.tokens.concat({ token });
+  await user.save();
   return token;
+};
+
+// Return only public profile of user as response
+userSchema.methods.toJSON = function () {
+  const user = this;
+  const userAsObject = user.toObject();
+
+  delete userAsObject.tokens;
+  delete userAsObject.password;
+
+  return userAsObject;
 };
 
 // Find user by email and password
@@ -97,6 +111,12 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// Delete accounts whenever a user is removed
+userSchema.pre("remove", async function (next) {
+  const user = this;
+  await accountModel.deleteMany({ user_id: this.user_id });
+  next();
+});
 const userModel = mongoose.model("users", userSchema);
 module.exports = userModel;
 // module.exports = mongoose.model("users", userSchema);
