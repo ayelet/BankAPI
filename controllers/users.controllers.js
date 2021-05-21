@@ -19,13 +19,14 @@ const getUsers = async (res) => {
 // 2. Get a specific user
 const getUser = async (req, res) => {
   try {
-    const user_id = parseInt(req.params.id);
-    if (!validate(user_id))
-      return res.status(400).send("Bad request, invalid ID");
-    console.log("1. getting user by id ", user_id);
-    const user = await userModel.find({ user_id: user_id });
+    const _id = parseInt(req.params.id);
+    // if (!validate(_id))
+    //   return res.status(400).send("Bad request, invalid ID");
+    console.log("#1. getting user by id ", _id, typeof _id);
+    const user = await userModel.findOne({ _id: _id });
+    console.log("user found: ", user);
     if (!user) return res.status(404).send("user does not exist");
-    console.log("2. getting user  ", user_id, user);
+    console.log("#2. getting user  ", _id, user);
     return res.status(200).send({ user: user });
     // if (!user) return res.status(404).send("No user found");
   } catch (err) {

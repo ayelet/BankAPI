@@ -10,9 +10,9 @@ const AccountsTable = () => {
     // const baseUrl = "https://bank-backend1.herokuapp.com/api/accounts/";
     try {
       axios.get(baseUrl).then(function (response) {
-        console.log(response);
+        // console.log(response);
         setAccounts(response.data);
-        console.log(accounts);
+        // console.log(accounts);
       });
     } catch (err) {
       console.log(err);
